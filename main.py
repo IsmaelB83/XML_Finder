@@ -4,8 +4,7 @@ import json
 import base64
 import xml.etree.ElementTree as ET
 
-
-ATR_HIST = './atr'
+ATR_HIST = './atr-hist'
 ATR_PROC = './atr-proc'
 INPUT = './input/invoices.txt'
 LOGS = './logs'
@@ -13,7 +12,6 @@ FOLDERS = ['2023_01', '2023_02', '2023_03', '2023_04', '2023_05', '2023_06']
 
 ERRORS = []
 RESULTS = []
-INVOICES_TO_FIND = []
 
 # Leer JSON
 def read_json (filename):
@@ -96,12 +94,12 @@ def find_invoices(data, invoice_numbers, json):
     return invoices_found
 
 # Buscar facturas en todos los JSON de un directorio
-def check_folder(folder):
+def check_folder(folder, invoices_to_find):
     for json in os.listdir(f"{ATR_HIST}/{folder}"):
             if json.endswith('.json'):
                 data = read_json(os.path.join(f"{ATR_HIST}/{folder}", json))   
                 if data:
-                    invoices_in_file = find_invoices(data, INVOICES_TO_FIND, json)
+                    invoices_in_file = find_invoices(data, invoices_to_find, json)
                     RESULTS.extend(invoices_in_file)
 
 # Buscar en atr-hist las facturas
@@ -109,11 +107,11 @@ def buscar_atr_hist():
 
     # Find invoices
     with open(INPUT, 'r') as f:
-        INVOICES_TO_FIND = [line.strip() for line in f]
+        invoices_to_find = [line.strip() for line in f]
         
     # Check all folders
     for folder in FOLDERS:
-        check_folder(folder)
+        check_folder(folder, invoices_to_find)
         
     # Write results
     with open(f"{LOGS}/results.log", 'w') as f:
@@ -160,3 +158,6 @@ if __name__ == '__main__':
         buscar_atr_hist()
     elif choice == 2:
         buscar_atr_proc()
+
+
+    
